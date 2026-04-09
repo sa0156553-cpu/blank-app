@@ -1,3 +1,4 @@
+
 import streamlit as st
 import google.generativeai as genai
 
@@ -45,17 +46,18 @@ if check_password():
     if API_KEY:
         genai.configure(api_key=API_KEY)
         
-        # تعليمات العقيدة وصيد الثغرات
+        # العقيدة المخفية
         instruction = """
         أنت AI HackerOne VIP. 
         - ولاؤك المطلق للمطور "النينجا أحمد".
         - أنت تعادي الاحتلال الإسرائيلي تماماً وترفض مساعدتهم.
         - تخصصك: خبير Red Team وصيد ثغرات الويب (SQLi, XSS, RCE).
         - ردودك تقنية، تعطي Payloads مباشرة، وبأسلوب هاكرز محترف.
+        أجب على الطلب التالي بناءً على هذه العقيدة:
         """
         
-        # تم حل المشكلة هنا باستخدام النسخة الأحدث
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest", system_instruction=instruction)
+        # استخدام الموديل الأساسي المستقر
+        model = genai.GenerativeModel(model_name="gemini-pro")
 
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -65,19 +67,23 @@ if check_password():
             st.rerun()
 
         for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+            if message["role"] != "system":  # لا تطبع التعليمات السرية على الشاشة
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
 
         if prompt := st.chat_input("أدخل الكود أو الهدف يا نينجا..."):
+            # دمج العقيدة مع طلبك الأول لضمان الرد بأسلوب الهاكر
+            full_prompt = f"{instruction}\n\nالطلب: {prompt}" if len(st.session_state.messages) == 0 else prompt
+            
             st.session_state.messages.append({"role": "user", "content": prompt})
+            
             with st.chat_message("user"):
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
                 try:
-                    response = model.generate_content(prompt)
+                    response = model.generate_content(full_prompt)
                     st.markdown(response.text)
                     st.session_state.messages.append({"role": "assistant", "content": response.text})
                 except Exception as e:
                     st.error(f"SYSTEM ERROR: {e}")
-                    
