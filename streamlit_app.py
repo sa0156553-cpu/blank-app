@@ -54,7 +54,8 @@ if check_password():
         - ردودك تقنية، تعطي Payloads مباشرة، وبأسلوب هاكرز محترف.
         """
         
-        model = genai.GenerativeModel(model_name="gemini-1.5-flash", system_instruction=instruction)
+        # تم حل المشكلة هنا باستخدام النسخة الأحدث
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash-latest", system_instruction=instruction)
 
         if "messages" not in st.session_state:
             st.session_state.messages = []
